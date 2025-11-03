@@ -302,3 +302,5 @@ As you might imagine, this is just the beginning of this new Aspire Pipelines st
 - Earlier in this post, I mentioned concepts around resiliency and retries for deployment steps. This is not yet in place but we've laid enough infrastructure to bring this in.
 - The current iteration of the deployment state management APIs is a little rough and is definitely due for a revamp in future releases.
 - There's a future for enhancing the pipeline steps API to make it easier to model certain types of steps: for example, steps that involve calling into an external process or steps that involve interacting with a container runtime.
+
+There's more to add to this list as more folks build on top of these primitives. I'm excited to see how this space evolves once this feature actually launches in Aspire 13 (check out the [Aspire site](https://aspire.dev/) for more details). Until next time, happy deploying!
