@@ -61,8 +61,8 @@ jobs:
         # Outputs to the './_site' directory by default
         # Build twice to work around issues with jekyll-og-image plugin
         run: |
-          bundle exec jekyll build --future false --baseurl "${{ steps.pages.outputs.base_path }}"
-          bundle exec jekyll build --future false --baseurl "${{ steps.pages.outputs.base_path }}"
+          bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+          bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
       - name: Upload artifact
