@@ -1,7 +1,6 @@
 ---
 title: "Pipe dreams to pipeline realities: an Aspire Pipelines story"
 description: "The behind-the-scenes chronicles of building Aspire's pipelines feature: from basic callbacks and progress reporting to a full-on concurrent pipeline concept."
-draft: true
 ---
 
 OK, sit down folks, because this one is gonna be a long one. This is the all-encompassing blog post about the thing I've been working on for the past few weeks: Aspire Pipelines. I've been writing about specific aspects of this feature over the past few weeks, including [my post from a while back about "modes" in Aspire](_posts/2025/2025-10-06-aspire-publish-vs-deploy.md) and [last week's post about the CLI redesign](_posts/2025/2025-10-27-aspire-deploy-cli-ux.md) for Aspire. Today, I want to talk about how the feature evolved from its initial inception, take a look at specific implementation details and how they changed, cover the feature in its current state, and talk a little bit about what's next for this area.
