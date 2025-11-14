@@ -4,17 +4,17 @@ title: Archive
 permalink: /archive/
 ---
 
-<div class="archive-content">
+<div class="archive-content" id="archive-content">
   {% assign posts_by_year = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
   
   {% for year in posts_by_year %}
-    <div class="archive-year">
+    <div class="archive-year" data-year="{{ year.name }}">
       <h2 class="archive-year-title">{{ year.name }}</h2>
       
       {% assign posts_by_month = year.items | group_by_exp: "post", "post.date | date: '%B'" %}
       
       {% for month in posts_by_month %}
-        <div class="archive-month">
+        <div class="archive-month" data-month="{{ month.name }}">
           <h3 class="archive-month-title">{{ month.name }}</h3>
           
           <ul class="archive-post-list">
@@ -38,3 +38,73 @@ permalink: /archive/
     <p class="archive-empty">No posts found.</p>
   {% endif %}
 </div>
+
+<div class="archive-loading" id="archive-loading" style="display: none;">
+  <div class="loading-spinner">Loading more posts...</div>
+</div>
+
+<script>
+(function() {
+  const archiveContent = document.getElementById('archive-content');
+  const loadingIndicator = document.getElementById('archive-loading');
+  const archiveYears = Array.from(document.querySelectorAll('.archive-year'));
+  
+  // Initially hide all years except the first one
+  const itemsToShowInitially = 1;
+  let visibleYears = 0;
+  
+  archiveYears.forEach((year, index) => {
+    if (index >= itemsToShowInitially) {
+      year.style.display = 'none';
+    } else {
+      visibleYears++;
+    }
+  });
+  
+  // Show loading indicator if there are more items to load
+  if (visibleYears < archiveYears.length) {
+    loadingIndicator.style.display = 'block';
+  }
+  
+  // Function to load next year
+  function loadNextYear() {
+    if (visibleYears < archiveYears.length) {
+      const nextYear = archiveYears[visibleYears];
+      nextYear.style.display = 'block';
+      
+      // Fade in animation
+      nextYear.style.opacity = '0';
+      nextYear.style.transform = 'translateY(20px)';
+      nextYear.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      
+      setTimeout(() => {
+        nextYear.style.opacity = '1';
+        nextYear.style.transform = 'translateY(0)';
+      }, 10);
+      
+      visibleYears++;
+      
+      // Hide loading indicator if all items are loaded
+      if (visibleYears >= archiveYears.length) {
+        loadingIndicator.style.display = 'none';
+      }
+    }
+  }
+  
+  // Intersection Observer for progressive loading
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && visibleYears < archiveYears.length) {
+        loadNextYear();
+      }
+    });
+  }, {
+    rootMargin: '100px'
+  });
+  
+  // Observe the loading indicator
+  if (loadingIndicator) {
+    observer.observe(loadingIndicator);
+  }
+})();
+</script>

@@ -36,6 +36,7 @@ mermaid:
 # Custom vars
 urls:
   about:          https://safia.rocks
+  github:         https://github.com/captainsafia
 
 defaults:
   - scope:
@@ -55,7 +56,7 @@ og_image:
   border_bottom:
     width: 20
     fill:
-      - "#90a959"
+      - "#6b8e3f"
 
 # Do not publish future posts
 future: false

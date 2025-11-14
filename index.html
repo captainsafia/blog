@@ -3,36 +3,36 @@ layout: default
 title: Home
 ---
 
-<section class="posts" aria-label="Blog posts">
-  {% for post in paginator.posts %}
-  <article class="post">
-    <header>
-      <h1 class="post-title">
-        <a href="{{ post.url }}">
-          {{ post.title }}
-        </a>
-      </h1>
-      <div class="post-date">
-        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date_to_string }}</time> | 
-        {% include read-time.html content = post.content %} |
-        by <a href="https://captainsafia.com" target="_blank" rel="noopener noreferrer">Safia Abdalla</a>
+<div class="home-intro">
+  <p class="home-description">
+    I'm <a href="https://captainsafia.com" target="_blank"
+      rel="noopener noreferrer">Safia</a>, a software engineer and writer. I work at <a href="https://microsoft.com" target="_blank"
+      rel="noopener noreferrer">Microsoft</a> on developers tools and frameworks. This is the little corner of the
+    Internet where I talk about what I'm building and how I am building it.
+  </p>
+</div>
+
+<section class="recent-posts" aria-label="Recent posts">
+  <h2 class="recent-posts-title">Recent Posts</h2>
+  <ul class="recent-posts-list">
+    {% for post in site.posts limit:5 %}
+    <li class="recent-post-item">
+      <div class="recent-post-header">
+        <h3 class="recent-post-title">
+          <a href="{{ post.url }}">{{ post.title }}</a>
+        </h3>
+        <div class="recent-post-date">
+          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date_to_string }}</time>
+        </div>
       </div>
-    </header>
+      {% if post.excerpt %}
+      <p class="recent-post-excerpt">{{ post.excerpt | strip_html | truncatewords: 30 }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
 
-    {{ post.content }}
-  </article>
-  {% endfor %}
+  <div class="view-all-posts">
+    <a href="{{ '/archive/' | relative_url }}" class="view-all-link">view all posts →</a>
+  </div>
 </section>
-
-<nav class="pagination" aria-label="Pagination navigation">
-  {% if paginator.next_page %}
-    <a class="pagination-item older" href="{{ paginator.next_page_path | relative_url }}" aria-label="Go to older posts">Older</a>
-  {% else %}
-    <span class="pagination-item older" aria-label="No older posts available">Older</span>
-  {% endif %}
-  {% if paginator.previous_page %}
-    <a class="pagination-item newer" href="{{ paginator.previous_page_path | relative_url }}" aria-label="Go to newer posts">Newer</a>
-  {% else %}
-    <span class="pagination-item newer" aria-label="No newer posts available">Newer</span>
-  {% endif %}
-</nav>

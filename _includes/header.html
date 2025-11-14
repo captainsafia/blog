@@ -2,7 +2,7 @@
   <div class="top-nav-container">
     <div>
       <h1 class="site-title">
-        <a href="{{ '/' | relative_url }}">🐛 {{ site.title }}</a>
+        <a href="{{ '/' | relative_url }}">Bug Repellent</a>
       </h1>
       <span class="site-description">{{ site.description }}</span>
     </div>
@@ -19,41 +19,24 @@
     
     <nav class="nav-menu" id="nav-menu" role="navigation" aria-label="Main navigation">
       <li class="nav-menu-item">
-        <a href="{{ '/' | relative_url }}" {% if page.url == "/" %}class="active"{% endif %}>Home</a>
+        <a href="{{ '/' | relative_url }}" {% if page.url == "/" %}class="active"{% endif %}>Writing</a>
       </li>
-      
-      {% assign pages_list = site.pages | sort: 'title' %}
-      {% for node in pages_list %}
-        {% if node.title != null %}
-          {% if node.layout == "page" %}
-            <li class="nav-menu-item">
-              <a href="{{ node.url }}" {% if page.url == node.url %}class="active"{% endif %}>{{ node.title }}</a>
-            </li>
-          {% endif %}
-        {% endif %}
-      {% endfor %}
       
       {% if site.urls.github %}
       <li class="nav-menu-item">
-        <a href="{{ site.urls.github }}" target="_blank" rel="noopener noreferrer" aria-label="GitHub (opens in new tab)">GitHub</a>
+        <a href="{{ site.urls.github }}" target="_blank" rel="noopener noreferrer">Code</a>
       </li>
       {% endif %}
       
-      {% if site.urls.bluesky %}
       <li class="nav-menu-item">
-        <a href="{{ site.urls.bluesky }}" target="_blank" rel="noopener noreferrer" aria-label="Bluesky (opens in new tab)">Bluesky</a>
+        <a href="{{ '/archive' | relative_url }}" {% if page.url contains '/archive' %}class="active"{% endif %}>Archive</a>
       </li>
-      {% endif %}
       
       {% if site.urls.about %}
       <li class="nav-menu-item">
-        <a href="{{ site.urls.about }}" target="_blank" rel="noopener noreferrer" aria-label="About (opens in new tab)">About</a>
+        <a href="{{ site.urls.about }}" target="_blank" rel="noopener noreferrer">About</a>
       </li>
       {% endif %}
-      
-      <div class="nav-footer">
-        &copy; {{ site.time | date: '%Y' }}. All rights reserved.
-      </div>
     </nav>
   </div>
 </header>
@@ -66,18 +49,9 @@
     
     menuToggle.classList.toggle('open');
     navMenu.classList.toggle('open');
-    
-    // Update ARIA attributes for accessibility
     menuToggle.setAttribute('aria-expanded', !isOpen);
-    
-    // Focus management for better keyboard navigation
-    if (!isOpen) {
-      // When opening, focus stays on button
-      menuToggle.focus();
-    }
   });
   
-  // Close menu when clicking outside or pressing Escape
   document.addEventListener('click', function(event) {
     const navMenu = document.getElementById('nav-menu');
     const menuToggle = document.getElementById('mobile-menu-toggle');
@@ -97,7 +71,6 @@
       navMenu.classList.remove('open');
       menuToggle.classList.remove('open');
       menuToggle.setAttribute('aria-expanded', 'false');
-      menuToggle.focus();
     }
   });
 </script>
