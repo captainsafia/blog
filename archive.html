@@ -94,13 +94,26 @@ permalink: /archive/
   // Intersection Observer for progressive loading
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting && visibleYears < archiveYears.length) {
-        loadNextYear();
+      if (entry.isIntersecting) {
+        loadMoreIfNeeded();
       }
     });
   }, {
     rootMargin: '100px'
   });
+
+  function loadMoreIfNeeded() {
+    if (visibleYears < archiveYears.length) {
+      loadNextYear();
+      requestAnimationFrame(() => {
+        const rect = loadingIndicator.getBoundingClientRect();
+        const isStillVisible = rect.top < window.innerHeight;
+        if (isStillVisible && visibleYears < archiveYears.length) {
+          loadMoreIfNeeded();
+        }
+      });
+    }
+  }
   
   // Observe the loading indicator
   if (loadingIndicator) {
