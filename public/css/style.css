@@ -160,9 +160,7 @@ img {
   display: block;
   max-width: 100%;
   height: auto;
-  margin: 2rem auto;
-  padding: 0 2rem;
-  border-radius: 8px;
+  margin: 2rem 0;
 }
 
 /* Tables */
