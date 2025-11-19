@@ -19,6 +19,7 @@ group :jekyll_plugins do
   gem 'jekyll-mermaid'
   gem 'jekyll-target-blank'
   gem 'jemoji'
+  gem 'jekyll-sitemap'
 end
 
 # Windows and JRuby does not include zoneinfo files, so bundle the tzinfo-data gem
@@ -37,8 +38,6 @@ gem "csv", "~> 3.3"
 gem "base64", "~> 0.3.0"
 
 gem "bigdecimal", "~> 3.2"
-
-gem "jekyll-paginate", "~> 1.1"
 
 gem 'jekyll-seo-tag'
 

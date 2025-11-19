@@ -20,15 +20,12 @@ author:
 
 plugins:
   - jekyll-feed
-  - jekyll-paginate
   - jekyll-mermaid
   - jekyll-target-blank
   - jekyll-seo-tag
   - jekyll-og-image
   - jemoji
-
-paginate:            1
-paginate_path:       "page:num"
+  - jekyll-sitemap
 
 mermaid:
   src: https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js
