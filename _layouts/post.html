@@ -2,6 +2,39 @@
 layout: default
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ page.title | escape }}",
+  "datePublished": "{{ page.date | date_to_xmlschema }}",
+  {% if page.modified_date or page.last_modified_at %}
+  "dateModified": "{{ page.modified_date | default: page.last_modified_at | date_to_xmlschema }}",
+  {% else %}
+  "dateModified": "{{ page.date | date_to_xmlschema }}",
+  {% endif %}
+  "author": {
+    "@type": "Person",
+    "name": "Safia Abdalla",
+    "url": "https://captainsafia.com"
+  },
+  {% if page.description %}
+  "description": "{{ page.description | escape }}",
+  {% endif %}
+  {% if page.image %}
+  "image": "{{ page.image | absolute_url }}",
+  {% endif %}
+  "publisher": {
+    "@type": "Person",
+    "name": "Safia Abdalla"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ page.url | absolute_url }}"
+  }
+}
+</script>
+
 <article class="post">
   <header>
     <h1 class="post-title">{{ page.title }}</h1>
