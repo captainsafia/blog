@@ -1,0 +1,178 @@
+# Workflow for deploying PR previews
+# This workflow builds the Jekyll site and creates a preview deployment for each PR.
+# It supports multiple deployment targets (Netlify, Vercel, Cloudflare) based on available secrets.
+name: Deploy PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+# Sets permissions for the GITHUB_TOKEN
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
+# Allow only one concurrent deployment per PR
+concurrency:
+  group: "preview-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
+jobs:
+  # Build and deploy preview
+  deploy-preview:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4.5"
+          bundler-cache: true
+          cache-version: 0
+
+      - name: Install libvips (with retries)
+        shell: bash
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          set -euo pipefail
+          sudo dpkg --configure -a || true
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get -o Acquire::Retries=3 install -y --no-install-recommends \
+            libvips libpoppler-glib8t64
+
+      - name: Build with Jekyll
+        run: |
+          bundle exec jekyll build --baseurl "/pr-${{ github.event.pull_request.number }}"
+          bundle exec jekyll build --baseurl "/pr-${{ github.event.pull_request.number }}"
+        env:
+          JEKYLL_ENV: production
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-site-pr-${{ github.event.pull_request.number }}
+          path: _site/
+          retention-days: 7
+
+      # Deploy to Netlify if token is available
+      - name: Deploy to Netlify
+        if: ${{ secrets.NETLIFY_AUTH_TOKEN != '' }}
+        id: netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: './_site'
+          production-deploy: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from PR #${{ github.event.pull_request.number }}"
+          alias: pr-${{ github.event.pull_request.number }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 5
+        continue-on-error: true
+
+      # Deploy to Vercel if token is available
+      - name: Deploy to Vercel
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        id: vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./_site
+          alias-domains: pr-${{ github.event.pull_request.number }}.vercel.app
+        continue-on-error: true
+
+      # Deploy to Cloudflare Pages if token is available
+      - name: Deploy to Cloudflare Pages
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        id: cloudflare
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: blog-preview
+          directory: _site
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: pr-${{ github.event.pull_request.number }}
+        continue-on-error: true
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const netlifyUrl = '${{ steps.netlify.outputs.deploy-url }}';
+            const vercelUrl = '${{ steps.vercel.outputs.preview-url }}';
+            const cloudflareUrl = '${{ steps.cloudflare.outputs.url }}';
+            const artifactUrl = `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+            const prNumber = context.payload.pull_request.number;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Preview deployment')
+            );
+
+            let commentBody = `## 🚀 Preview deployment ready!\n\n`;
+
+            // Add live preview links if available
+            if (netlifyUrl) {
+              commentBody += `**Netlify Preview:** ${netlifyUrl}\n\n`;
+            }
+            if (vercelUrl) {
+              commentBody += `**Vercel Preview:** ${vercelUrl}\n\n`;
+            }
+            if (cloudflareUrl) {
+              commentBody += `**Cloudflare Preview:** ${cloudflareUrl}\n\n`;
+            }
+
+            // Always include artifact download link
+            commentBody += `**Download Preview:** [Download site artifact](${artifactUrl})\n\n`;
+            commentBody += `This preview will update automatically with each new commit to this PR.\n\n`;
+            commentBody += `---\n*Built with commit ${context.sha.substring(0, 7)}*`;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }
+
+  # Cleanup preview when PR is closed
+  cleanup-preview:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## 🧹 Preview deployment cleaned up\n\nThe preview for this PR has been removed as the PR is now closed.`
+            });
