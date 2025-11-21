@@ -46,6 +46,7 @@ jobs:
             libvips libpoppler-glib8t64
 
       - name: Build with Jekyll
+        # Build twice to work around issues with jekyll-og-image plugin
         run: |
           bundle exec jekyll build --baseurl "/pr-${{ github.event.pull_request.number }}"
           bundle exec jekyll build --baseurl "/pr-${{ github.event.pull_request.number }}"
