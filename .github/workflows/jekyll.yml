@@ -10,6 +10,9 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
+  # Runs daily at 2am PT (10am UTC) to publish future-dated posts
+  schedule:
+    - cron: '0 10 * * *'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
