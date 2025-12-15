@@ -1,5 +1,5 @@
 ---
-title: "Fixing Aspire's image: a look at container registry support in 13.1"
+title: "Fixing Aspire's image problem: a look at container registry support in 13.1"
 description: "Exploring the improvements to custom image registry support in Aspire 13.1, and why explicit modeling beats implicit behavior."
 ---
 
