@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTY Behavior Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .terminal {
+            font-family: 'JetBrains Mono', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .ansi-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .terminal-cursor {
+            display: inline-block;
+            background-color: #22c55e;
+            color: #000000;
+            animation: cursor-blink 1.2s step-end infinite;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .terminal-cursor-empty {
+            display: inline-block;
+            width: 0.6em;
+            height: 1.2em;
+            background-color: #22c55e;
+            animation: cursor-blink 1.2s step-end infinite;
+        }
+        @keyframes cursor-blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0.3; }
+        }
+        @keyframes terminal-flash {
+            0%, 100% { background-color: #0f172a; }
+            50% { background-color: #ffffff; }
+        }
+        .terminal-flashing {
+            animation: terminal-flash 0.3s ease-in-out;
+        }
+        .ansi-popup {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: #1e293b;
+            color: #22c55e;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            animation: popup-fade 1s ease-out;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+        }
+        .ansi-popup::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1e293b;
+        }
+        @keyframes popup-fade {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-4px);
+            }
+            15%, 85% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-8px);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-12px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-transparent min-h-screen text-slate-900">
+    <!-- Mobile Warning -->
+    <div class="md:hidden bg-yellow-50 border-l-4 border-yellow-400 p-6 m-4 rounded-lg shadow-md">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <span class="text-3xl">📱</span>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-semibold text-yellow-800 mb-1">Whoa there, mobile warrior!</h3>
+                <p class="text-sm text-yellow-700">
+                    This PTY explorer has more buttons than your screen has pixels. For the full button-mashing experience, please visit on a desktop. Your thumbs will thank you.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container mx-auto px-6 py-8 hidden md:block">
+        <!-- Main Content -->
+        <div class="space-y-6">
+            <!-- Terminal Visualizer -->
+            <div class="bg-slate-100 rounded-xl shadow-lg border border-slate-300 overflow-hidden">
+                <div class="bg-slate-200 px-4 py-3 flex items-center space-x-2 border-b border-slate-300">
+                    <div class="flex space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                </div>
+                <div id="terminal" class="terminal p-6 min-h-[400px] bg-slate-900 text-green-400 overflow-auto"></div>
+            </div>
+
+
+            <!-- Controls Section -->
+            <div class="space-y-4">
+                <!-- Text Input with WYSIWYG Toolbar -->
+                <div class="bg-white rounded-xl shadow-lg border border-slate-300">
+                    <!-- Toolbar -->
+                    <div class="bg-slate-100 border-b border-slate-300 p-3 rounded-t-xl">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Font Styles -->
+                            <div class="flex items-center gap-1">
+                                <button onclick="toggleStyle('bold')" id="btn-bold" class="toolbar-btn w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700" title="Bold">
+                                    <span class="font-bold">B</span>
+                                </button>
+                                <button onclick="toggleStyle('italic')" id="btn-italic" class="toolbar-btn w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700" title="Italic">
+                                    <span class="italic">I</span>
+                                </button>
+                                <button onclick="toggleStyle('underline')" id="btn-underline" class="toolbar-btn w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700" title="Underline">
+                                    <span class="underline">U</span>
+                                </button>
+                                <button onclick="toggleStyle('dim')" id="btn-dim" class="toolbar-btn w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700" title="Dim">
+                                    <span class="opacity-50">D</span>
+                                </button>
+                                <button onclick="toggleStyle('blink')" id="btn-blink" class="toolbar-btn w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700" title="Blink">
+                                    <span>✦</span>
+                                </button>
+                                <button onclick="toggleStyle('reverse')" id="btn-reverse" class="toolbar-btn w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700" title="Reverse">
+                                    <span>⇄</span>
+                                </button>
+                            </div>
+                            
+                            <div class="h-6 w-px bg-slate-300"></div>
+                            
+                            <!-- Foreground Colors -->
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs text-slate-600 mr-1">FG:</span>
+                                <button onclick="setFgColor('black')" class="w-7 h-7 bg-black hover:scale-110 rounded border border-slate-200 transition-all" title="Black"></button>
+                                <button onclick="setFgColor('red')" class="w-7 h-7 bg-red-600 hover:scale-110 rounded border border-slate-200 transition-all" title="Red"></button>
+                                <button onclick="setFgColor('green')" class="w-7 h-7 bg-green-600 hover:scale-110 rounded border border-slate-200 transition-all" title="Green"></button>
+                                <button onclick="setFgColor('yellow')" class="w-7 h-7 bg-yellow-500 hover:scale-110 rounded border border-slate-200 transition-all" title="Yellow"></button>
+                                <button onclick="setFgColor('blue')" class="w-7 h-7 bg-blue-600 hover:scale-110 rounded border border-slate-200 transition-all" title="Blue"></button>
+                                <button onclick="setFgColor('magenta')" class="w-7 h-7 bg-purple-600 hover:scale-110 rounded border border-slate-200 transition-all" title="Magenta"></button>
+                                <button onclick="setFgColor('cyan')" class="w-7 h-7 bg-cyan-500 hover:scale-110 rounded border border-slate-200 transition-all" title="Cyan"></button>
+                                <button onclick="setFgColor('white')" class="w-7 h-7 bg-white hover:scale-110 rounded border border-slate-200 transition-all" title="White"></button>
+                                <button onclick="setFgColor('default')" class="w-7 h-7 bg-gradient-to-br from-slate-200 to-slate-300 hover:scale-110 rounded border border-slate-200 transition-all text-slate-700" title="Default">×</button>
+                            </div>
+                            
+                            <div class="h-6 w-px bg-slate-300"></div>
+                            
+                            <!-- Background Colors -->
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs text-slate-600 mr-1">BG:</span>
+                                <button onclick="setBgColor('black')" class="w-7 h-7 bg-black hover:scale-110 rounded border border-slate-200 transition-all" title="Black"></button>
+                                <button onclick="setBgColor('red')" class="w-7 h-7 bg-red-600 hover:scale-110 rounded border border-slate-200 transition-all" title="Red"></button>
+                                <button onclick="setBgColor('green')" class="w-7 h-7 bg-green-600 hover:scale-110 rounded border border-slate-200 transition-all" title="Green"></button>
+                                <button onclick="setBgColor('yellow')" class="w-7 h-7 bg-yellow-500 hover:scale-110 rounded border border-slate-200 transition-all" title="Yellow"></button>
+                                <button onclick="setBgColor('blue')" class="w-7 h-7 bg-blue-600 hover:scale-110 rounded border border-slate-200 transition-all" title="Blue"></button>
+                                <button onclick="setBgColor('magenta')" class="w-7 h-7 bg-purple-600 hover:scale-110 rounded border border-slate-200 transition-all" title="Magenta"></button>
+                                <button onclick="setBgColor('cyan')" class="w-7 h-7 bg-cyan-500 hover:scale-110 rounded border border-slate-200 transition-all" title="Cyan"></button>
+                                <button onclick="setBgColor('white')" class="w-7 h-7 bg-white hover:scale-110 rounded border border-slate-200 transition-all" title="White"></button>
+                                <button onclick="setBgColor('default')" class="w-7 h-7 bg-gradient-to-br from-slate-200 to-slate-300 hover:scale-110 rounded border border-slate-200 transition-all text-slate-700" title="Default">×</button>
+                            </div>
+                            
+                            <div class="h-6 w-px bg-slate-300"></div>
+                            
+                            <!-- Quick Actions -->
+                            <div class="flex items-center gap-1">
+                                <button onclick="addNewline()" id="btn-newline" class="w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700 relative" title="Newline">
+                                    🆕
+                                </button>
+                                <button onclick="moveCursorUp()" id="btn-cursor-up" class="w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700 relative" title="Cursor Up">
+                                    ⬆️
+                                </button>
+                                <button onclick="moveCursorDown()" id="btn-cursor-down" class="w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700 relative" title="Cursor Down">
+                                    ⬇️
+                                </button>
+                                <button onclick="moveCursorLeft()" id="btn-cursor-left" class="w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700 relative" title="Cursor Left">
+                                    ⬅️
+                                </button>
+                                <button onclick="moveCursorRight()" id="btn-cursor-right" class="w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700 relative" title="Cursor Right">
+                                    ➡️
+                                </button>
+                                <button onclick="triggerBell()" id="btn-bell" class="w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700 relative" title="Bell">
+                                    🔔
+                                </button>
+                            </div>
+                            
+                            <div class="h-6 w-px bg-slate-300"></div>
+                            
+                            <div class="flex items-center gap-1">
+                                <button onclick="clearTerminal()" class="w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700" title="Clear Terminal">
+                                    🗑️
+                                </button>
+                                <button onclick="resetStyles()" class="w-9 h-9 bg-white hover:bg-slate-200 rounded text-sm transition-all border border-slate-300 text-slate-700" title="Reset Styles">
+                                    🔄
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Text Input Area -->
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <!-- ANSI Code Display -->
+                            <div>
+                                <h3 class="text-xs font-semibold text-slate-600 mb-2">Current ANSI Sequence</h3>
+                                <div id="ansiDisplay" class="ansi-code p-3 bg-slate-50 rounded-lg border border-slate-200 text-cyan-700 text-sm break-all">
+                                    <span class="text-slate-500">No styles applied</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Text Input -->
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 mb-2 block">Text Input</label>
+                                <input 
+                                    type="text" 
+                                    id="textInput" 
+                                    placeholder="Type your text and press Enter..."
+                                    class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
