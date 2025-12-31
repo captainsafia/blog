@@ -50,9 +50,8 @@ module Jekyll
           if post_match = post.url.match(/\/(\d{4})\/(\d{2})\/(\d{2})\/(.+)\/$/)
             year, month, day, slug = post_match[1], post_match[2], post_match[3], post_match[4]
             
-            # Create redirects for old HTML extension URLs
+            # Create redirect for old HTML extension URLs
             tumblr_redirects["/#{year}-#{month}-#{day}-#{slug}/"] = post.url
-            tumblr_redirects["/#{year}-#{month}-#{day}-#{slug}"] = post.url
           end
         end
       end
