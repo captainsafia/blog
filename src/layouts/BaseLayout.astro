@@ -1,0 +1,40 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Head from '../components/Head.astro';
+import '../styles/style.css';
+import '../styles/syntax.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  date?: Date;
+  modifiedDate?: Date;
+}
+
+const { title, description, ogImage, date, modifiedDate } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <Head 
+      title={title} 
+      description={description} 
+      ogImage={ogImage}
+      date={date}
+      modifiedDate={modifiedDate}
+    />
+  </head>
+
+  <body>
+    <Header />
+
+    <main class="content container" id="main-content">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

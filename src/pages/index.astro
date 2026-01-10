@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { parseDateFromFilename, formatDate, getPostUrl } from '../utils/blog';
+
+// Get all blog posts and sort by date
+const allPosts = await getCollection('blog');
+const sortedPosts = allPosts
+  .map(post => {
+    const dateFromFilename = parseDateFromFilename(post.id);
+    return {
+      ...post,
+      data: {
+        ...post.data,
+        date: post.data.date || dateFromFilename
+      }
+    };
+  })
+  .filter(post => post.data.date)
+  .sort((a, b) => b.data.date!.getTime() - a.data.date!.getTime());
+
+// Get 5 most recent posts
+const recentPosts = sortedPosts.slice(0, 5);
+
+// Helper to extract excerpt from content
+function getExcerpt(content: string, wordLimit: number = 30): string {
+  // Remove frontmatter, code blocks, and HTML tags
+  let text = content
+    .replace(/^---[\s\S]*?---/, '') // Remove frontmatter
+    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Convert markdown links to text
+    .trim();
+  
+  // Split into words and take first N
+  const words = text.split(/\s+/).slice(0, wordLimit);
+  return words.join(' ') + (words.length >= wordLimit ? '...' : '');
+}
+---
+
+<BaseLayout title="Home">
+  <div class="home-intro">
+    <p class="home-description">
+      I'm <a href="https://captainsafia.com" target="_blank" rel="noopener noreferrer">Safia</a>, 
+      a software engineer and writer. I work at 
+      <a href="https://microsoft.com" target="_blank" rel="noopener noreferrer">Microsoft</a> 
+      on developers tools and frameworks. This is the little corner of the Internet where I talk 
+      about what I'm building and how I am building it.
+    </p>
+  </div>
+
+  <section class="recent-posts" aria-label="Recent posts">
+    <h2 class="recent-posts-title">Recent Posts</h2>
+    <ul class="recent-posts-list">
+      {recentPosts.map((post) => (
+        <li class="recent-post-item">
+          <div class="recent-post-header">
+            <h3 class="recent-post-title">
+              <a href={getPostUrl(post.id)}>{post.data.title}</a>
+            </h3>
+            <div class="recent-post-date">
+              <time datetime={post.data.date?.toISOString()}>
+                {post.data.date && formatDate(post.data.date)}
+              </time>
+            </div>
+          </div>
+          <p class="recent-post-excerpt">{getExcerpt(post.body, 30)}</p>
+        </li>
+      ))}
+    </ul>
+
+    <div class="view-all-posts">
+      <a href="/archive/" class="view-all-link">view all posts →</a>
+    </div>
+  </section>
+</BaseLayout>

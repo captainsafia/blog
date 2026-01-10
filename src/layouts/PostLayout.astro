@@ -1,0 +1,85 @@
+---
+import { getPostUrl } from '../utils/blog';
+import BaseLayout from './BaseLayout.astro';
+import { formatDate, calculateReadTime, getRelatedPosts } from '../utils/blog';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  title: string;
+  description?: string;
+  date: Date;
+  modifiedDate?: Date;
+  ogImage?: string;
+  content: string;
+  postId: string;
+}
+
+const { title, description, date, modifiedDate, ogImage, content, postId } = Astro.props;
+const readTime = calculateReadTime(content);
+
+// Get all posts for related posts
+const allPosts = await getCollection('blog');
+const currentPost = allPosts.find(p => p.id === postId);
+const relatedPosts = currentPost ? getRelatedPosts(allPosts, currentPost, 3) : [];
+---
+
+<BaseLayout 
+  title={title} 
+  description={description} 
+  ogImage={ogImage}
+  date={date}
+  modifiedDate={modifiedDate}
+>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": title,
+    "datePublished": date.toISOString(),
+    "dateModified": (modifiedDate || date).toISOString(),
+    "author": {
+      "@type": "Person",
+      "name": "Safia Abdalla",
+      "url": "https://captainsafia.com"
+    },
+    "description": description,
+    "image": ogImage,
+    "publisher": {
+      "@type": "Person",
+      "name": "Safia Abdalla"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": Astro.url.href
+    }
+  })} />
+
+  <article class="post">
+    <header>
+      <h1 class="post-title">{title}</h1>
+      <div class="post-date">
+        <time datetime={date.toISOString()}>{formatDate(date)}</time> · 
+        {readTime} minute{readTime !== 1 ? 's' : ''} to read ·
+        by <a href="https://captainsafia.com" target="_blank" rel="noopener noreferrer">Safia Abdalla</a>
+      </div>
+    </header>
+    <slot />
+  </article>
+
+  {relatedPosts.length > 0 && (
+    <aside class="related" aria-labelledby="related-posts-heading">
+      <h2 id="related-posts-heading">Related Posts</h2>
+      <ul class="related-posts">
+        {relatedPosts.map((post) => (
+          <li>
+            <h3>
+              <a href={`/${getPostUrl(post.id)}/`}>
+                {post.data.title}
+              </a>
+            </h3>
+            <small><time datetime={post.data.date?.toISOString()}>{post.data.date && formatDate(post.data.date)}</time></small>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )}
+</BaseLayout>

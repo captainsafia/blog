@@ -1,0 +1,76 @@
+---
+const currentPath = Astro.url.pathname;
+---
+
+<header class="top-nav">
+  <div class="top-nav-container">
+    <div>
+      <h1 class="site-title">
+        <a href="/">Bug Repellent</a>
+      </h1>
+    </div>
+    
+    <button class="mobile-menu-toggle" 
+            id="mobile-menu-toggle" 
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+            aria-controls="nav-menu">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    
+    <nav class="nav-menu" id="nav-menu" role="navigation" aria-label="Main navigation">
+      <li class="nav-menu-item">
+        <a href="/" class={currentPath === "/" ? "active" : ""}>Writing</a>
+      </li>
+      
+      <li class="nav-menu-item">
+        <a href="https://github.com/captainsafia" target="_blank" rel="noopener noreferrer">Code</a>
+      </li>
+      
+      <li class="nav-menu-item">
+        <a href="/archive/" class={currentPath.includes('/archive') ? "active" : ""}>Archive</a>
+      </li>
+      
+      <li class="nav-menu-item">
+        <a href="https://safia.rocks" target="_blank" rel="noopener noreferrer">About</a>
+      </li>
+    </nav>
+  </div>
+</header>
+
+<script>
+  document.getElementById('mobile-menu-toggle')?.addEventListener('click', function() {
+    const menuToggle = this;
+    const navMenu = document.getElementById('nav-menu');
+    const isOpen = navMenu?.classList.contains('open');
+    
+    menuToggle.classList.toggle('open');
+    navMenu?.classList.toggle('open');
+    menuToggle.setAttribute('aria-expanded', String(!isOpen));
+  });
+  
+  document.addEventListener('click', function(event) {
+    const navMenu = document.getElementById('nav-menu');
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const target = event.target as Node;
+    
+    if (navMenu && menuToggle && !navMenu.contains(target) && !menuToggle.contains(target)) {
+      navMenu.classList.remove('open');
+      menuToggle.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      const navMenu = document.getElementById('nav-menu');
+      const menuToggle = document.getElementById('mobile-menu-toggle');
+      
+      navMenu?.classList.remove('open');
+      menuToggle?.classList.remove('open');
+      menuToggle?.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
