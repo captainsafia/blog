@@ -1,0 +1,237 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { parseDateFromFilename, getPostUrl } from '../utils/blog';
+
+// Get all blog posts and sort by date
+const allPosts = await getCollection('blog');
+const sortedPosts = allPosts
+  .map(post => {
+    const dateFromFilename = parseDateFromFilename(post.id);
+    return {
+      ...post,
+      data: {
+        ...post.data,
+        date: post.data.date || dateFromFilename
+      }
+    };
+  })
+  .filter(post => post.data.date)
+  .sort((a, b) => b.data.date!.getTime() - a.data.date!.getTime());
+
+// Helper to extract excerpt from content
+function getExcerpt(content: string, wordLimit: number = 30): string {
+  // Remove frontmatter, code blocks, and HTML tags
+  let text = content
+    .replace(/^---[\s\S]*?---/, '') // Remove frontmatter
+    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Convert markdown links to text
+    .trim();
+  
+  // Split into words and take first N
+  const words = text.split(/\s+/).slice(0, wordLimit);
+  return words.join(' ') + (words.length >= wordLimit ? '...' : '');
+}
+---
+
+<BaseLayout title="Archive">
+  <div class="page">
+    <h1 class="page-title">Archive</h1>
+  </div>
+
+  <div class="archive-content">
+    {sortedPosts.map((post, index) => (
+      <div class="archive-post-item" data-index={index} data-page={Math.floor(index / 10) + 1}>
+        <h3 class="archive-post-title">
+          <a href={getPostUrl(post.id)} class="archive-post-link">
+            {post.data.title}
+          </a>
+        </h3>
+        <time class="archive-post-date" datetime={post.data.date?.toISOString()}>
+          {post.data.date?.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+        </time>
+        <p class="archive-post-excerpt">{getExcerpt(post.body, 30)}</p>
+      </div>
+    ))}
+  </div>
+
+  {sortedPosts.length > 10 && (
+    <div id="pagination" class="archive-pagination">
+      <button id="prev-btn" class="pagination-btn" disabled>← Previous</button>
+      <span class="pagination-info">
+        Page <span id="current-page">1</span> of <span id="total-pages">{Math.ceil(sortedPosts.length / 10)}</span>
+      </span>
+      <button id="next-btn" class="pagination-btn">Next →</button>
+    </div>
+  )}
+
+  <script define:vars={{ totalPosts: sortedPosts.length }}>
+    const postsPerPage = 10;
+    const totalPages = Math.ceil(totalPosts / postsPerPage);
+    let currentPage = 1;
+
+    // Get initial page from URL query parameter
+    function getPageFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      const page = parseInt(params.get('page') || '1');
+      return Math.max(1, Math.min(page, totalPages));
+    }
+
+    // Update URL with current page
+    function updateURL(page) {
+      const url = new URL(window.location.href);
+      if (page === 1) {
+        url.searchParams.delete('page');
+      } else {
+        url.searchParams.set('page', page.toString());
+      }
+      window.history.pushState({}, '', url);
+    }
+
+    function showPage(page) {
+      const items = document.querySelectorAll('.archive-post-item');
+      items.forEach(item => {
+        const itemPage = parseInt(item.getAttribute('data-page') || '1');
+        item.style.display = itemPage === page ? 'block' : 'none';
+      });
+
+      document.getElementById('current-page').textContent = page;
+      document.getElementById('prev-btn').disabled = page === 1;
+      document.getElementById('next-btn').disabled = page === totalPages;
+      currentPage = page;
+      updateURL(page);
+    }
+
+    document.getElementById('prev-btn')?.addEventListener('click', () => {
+      if (currentPage > 1) showPage(currentPage - 1);
+    });
+
+    document.getElementById('next-btn')?.addEventListener('click', () => {
+      if (currentPage < totalPages) showPage(currentPage + 1);
+    });
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', () => {
+      const page = getPageFromURL();
+      currentPage = page;
+      showPage(page);
+    });
+
+    // Initialize with page from URL
+    const initialPage = getPageFromURL();
+    showPage(initialPage);
+  </script>
+
+  <style>
+    .archive-content {
+      margin-top: 2rem;
+    }
+
+    .archive-post-item {
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .archive-post-item:last-child {
+      border-bottom: none;
+    }
+
+    .archive-post-title {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      line-height: 1.3;
+    }
+
+    .archive-post-link {
+      color: #333;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .archive-post-link:hover {
+      text-decoration: underline;
+      color: #6b8e3f;
+    }
+
+    .archive-post-date {
+      display: block;
+      color: #999;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .archive-post-excerpt {
+      color: #555;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      margin-bottom: 0;
+    }
+
+    .archive-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      margin: 3rem 0;
+      padding: 2rem 0;
+      border-top: 2px solid #eee;
+    }
+
+    .pagination-btn {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: #666;
+      border: none;
+      border-bottom: 1px solid transparent;
+      border-radius: 0;
+      font-size: 0.9rem;
+      font-weight: 400;
+      font-family: serif;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      color: #6b8e3f;
+      border-bottom: 1px solid #6b8e3f;
+    }
+
+    .pagination-btn:disabled {
+      color: #ccc;
+      border-bottom: 1px solid transparent;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      color: #666;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .archive-post-title {
+        font-size: 1.25rem;
+      }
+      
+      .archive-pagination {
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      
+      .pagination-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+      }
+      
+      .pagination-info {
+        width: 100%;
+        text-align: center;
+        order: -1;
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+</BaseLayout>

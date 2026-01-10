@@ -1,0 +1,23 @@
+{
+  "name": "astro-blog",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.13",
+    "@astrojs/rss": "^4.0.14",
+    "@astrojs/sitemap": "^3.6.1",
+    "@vercel/og": "^0.8.6",
+    "astro": "^5.16.8",
+    "astro-mermaid": "^1.1.0",
+    "mermaid": "^11.12.2",
+    "remark-emoji": "^5.0.2",
+    "satori": "^0.18.3",
+    "sharp": "^0.34.3"
+  }
+}

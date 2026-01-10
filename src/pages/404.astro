@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404: Page not found">
+  <div class="page">
+    <h1 class="page-title">404: Page not found</h1>
+    <p class="lead">
+      Sorry, we've misplaced that URL or it's pointing to something that doesn't exist. 
+      <a href="/">Head back home</a> to try finding it again.
+    </p>
+  </div>
+
+  <script is:inline>
+    // Handle client-side redirects for common URL patterns
+    (function() {
+      const path = window.location.pathname;
+      
+      // Handle malformed OG image URLs
+      if (path.includes('{"path"')) {
+        window.location.href = '/';
+        return;
+      }
+      
+      // Handle .md files in URL
+      if (path.endsWith('.md')) {
+        window.location.href = '/';
+        return;
+      }
+      
+      // Handle query parameters with ref
+      if (window.location.search.includes('ref=') || window.location.search.includes('utm_')) {
+        const cleanPath = path.replace(/\/$/, '') || '/';
+        if (cleanPath !== path || window.location.search) {
+          window.location.href = cleanPath;
+          return;
+        }
+      }
+      
+      // Handle /brief page
+      if (path === '/brief' || path === '/brief/') {
+        window.location.href = 'https://safia.rocks';
+        return;
+      }
+    })();
+</script>

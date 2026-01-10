@@ -1,0 +1,76 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../../../layouts/PostLayout.astro';
+import { parseDateFromFilename } from '../../../../utils/blog';
+
+export async function getStaticPaths() {
+  const blogPosts = await getCollection('blog');
+  
+  const paths = blogPosts.map((post) => {
+    // Parse date from filename format: YYYY/YYYY-MM-DD-slug
+    let match = post.id.match(/(\d{4})\/(\d{4})-(\d{2})-(\d{2})-(.*)$/);
+    
+    // Try format 2: tumblr/YYYY-MM-DD-slug or just YYYY-MM-DD-slug
+    if (!match) {
+      match = post.id.match(/(?:tumblr\/)?(\d{4})-(\d{2})-(\d{2})-(.*)$/);
+      if (match) {
+        const [, year, month, day, slug] = match;
+        const dateFromFilename = parseDateFromFilename(post.id);
+        const ogImageSlug = `${year}-${month}-${day}-${slug}`;
+        
+        return {
+          params: { 
+            year, 
+            month, 
+            day, 
+            slug 
+          },
+          props: { 
+            post,
+            date: post.data.date || dateFromFilename,
+            ogImageSlug
+          }
+        };
+      }
+      return null;
+    }
+    
+    const [, , year, month, day, slug] = match;
+    const dateFromFilename = parseDateFromFilename(post.id);
+    const ogImageSlug = `${year}-${month}-${day}-${slug}`;
+    
+    return {
+      params: { 
+        year, 
+        month, 
+        day, 
+        slug 
+      },
+      props: { 
+        post,
+        date: post.data.date || dateFromFilename,
+        ogImageSlug
+      }
+    };
+  });
+  
+  return paths.filter(Boolean);
+}
+
+const { post, date, ogImageSlug } = Astro.props;
+const { Content } = await render(post);
+const content = post.body;
+const ogImage = `/og/${ogImageSlug}.png`;
+---
+
+<PostLayout 
+  title={post.data.title} 
+  description={post.data.description}
+  date={date}
+  modifiedDate={post.data.modified_date || post.data.last_modified_at}
+  ogImage={ogImage}
+  content={content}
+  postId={post.id}
+>
+  <Content />
+</PostLayout>
