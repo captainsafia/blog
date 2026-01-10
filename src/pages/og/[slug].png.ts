@@ -12,7 +12,7 @@ export async function getStaticPaths() {
     const readTime = calculateReadTime(post.body);
     
     // Parse the post ID to get the URL slug
-    const match = post.id.match(/(\d{4})\/(\d{4})-(\d{2})-(\d{2})-(.*)$/);
+    const match = post.id.match(/(\d{4})\/(\d{4})-(\d{1,2})-(\d{1,2})-(.*)$/);
     let slug = post.id;
     if (match) {
       const [, , year, month, day, urlSlug] = match;
@@ -183,7 +183,7 @@ export const GET: APIRoute = async ({ props }) => {
             type: 'div',
             props: {
               style: {
-                width: 'calc(100% + 160px)',
+                width: 'auto',
                 height: '20px',
                 background: '#6b8e3f',
                 marginBottom: '-60px',
