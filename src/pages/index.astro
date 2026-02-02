@@ -31,7 +31,7 @@ function getExcerpt(content: string, wordLimit: number = 30): string {
     .replace(/<[^>]*>/g, '') // Remove HTML tags
     .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Convert markdown links to text
     .trim();
-  
+
   // Split into words and take first N
   const words = text.split(/\s+/).slice(0, wordLimit);
   return words.join(' ') + (words.length >= wordLimit ? '...' : '');
@@ -41,11 +41,8 @@ function getExcerpt(content: string, wordLimit: number = 30): string {
 <BaseLayout title="Home">
   <div class="home-intro">
     <p class="home-description">
-      I'm <a href="https://captainsafia.com" target="_blank" rel="noopener noreferrer">Safia</a>, 
-      a software engineer and writer. I work at 
-      <a href="https://microsoft.com" target="_blank" rel="noopener noreferrer">Microsoft</a> 
-      on developers tools and frameworks. This is the little corner of the Internet where I talk 
-      about what I'm building and how I am building it.
+      I'm <a href="https://captainsafia.com" target="_blank" rel="noopener noreferrer">Safia</a>,
+      a software engineer and writer. I'm helping build the future of agentic software dev at <a href="https://warp.dev" target="_blank" rel="noopener noreferrer">Warp</a>. This is the little corner of the Internet where I talk about what I'm building and how I am building it.
     </p>
   </div>
 
