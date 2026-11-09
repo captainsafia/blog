@@ -2,6 +2,7 @@ import { ImageResponse } from '@vercel/og';
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { parseDateFromFilename, formatDate, calculateReadTime } from '../../utils/blog';
+import { getAccentColor } from '../../utils/accent';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -38,6 +39,7 @@ export async function getStaticPaths() {
 
 export const GET: APIRoute = async ({ props }) => {
   const { title, date, readTime } = props as { title: string; date: string; readTime: string };
+  const { accent } = getAccentColor();
   
   return new ImageResponse(
     {
@@ -185,7 +187,7 @@ export const GET: APIRoute = async ({ props }) => {
               style: {
                 width: 'auto',
                 height: '20px',
-                background: '#6b8e3f',
+                background: accent,
                 marginBottom: '-60px',
                 marginRight: '-80px',
                 marginLeft: '-80px',
