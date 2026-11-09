@@ -185,7 +185,7 @@ export const GET: APIRoute = async ({ props }) => {
               style: {
                 width: 'auto',
                 height: '20px',
-                background: '#6b8e3f',
+                background: '#d6336c',
                 marginBottom: '-60px',
                 marginRight: '-80px',
                 marginLeft: '-80px',
