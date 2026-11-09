@@ -9,7 +9,7 @@ import { getAccentColor } from '../utils/accent';
 // Accent colors seeded from the build date; the inline script below re-seeds
 // them from the visitor's current date so the color changes daily even without
 // a rebuild.
-const { accent, accentDark } = getAccentColor();
+const { accent, accentDark, accentTint, accentTintBorder } = getAccentColor();
 
 interface Props {
   title: string;
@@ -32,7 +32,10 @@ const { title, description, ogImage, date, modifiedDate } = Astro.props;
       date={date}
       modifiedDate={modifiedDate}
     />
-    <style is:inline set:html={`html:root { --accent: ${accent}; --accent-dark: ${accentDark}; }`} />
+    <style
+      is:inline
+      set:html={`html:root { --accent: ${accent}; --accent-dark: ${accentDark}; --accent-tint: ${accentTint}; --accent-tint-border: ${accentTintBorder}; }`}
+    />
     <script is:inline>
       // Daily accent color: deterministic PRNG seeded from today's date (UTC).
       // Keep in sync with src/utils/accent.ts, which this mirrors for the client.
@@ -65,6 +68,8 @@ const { title, description, ogImage, date, modifiedDate } = Astro.props;
         var root = document.documentElement;
         root.style.setProperty('--accent', hslToHex(hue, 45, 40));
         root.style.setProperty('--accent-dark', hslToHex(hue, 45, 30));
+        root.style.setProperty('--accent-tint', hslToHex(hue, 35, 94));
+        root.style.setProperty('--accent-tint-border', hslToHex(hue, 30, 88));
       })();
     </script>
   </head>

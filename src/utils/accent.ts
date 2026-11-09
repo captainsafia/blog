@@ -39,6 +39,8 @@ function hslToHex(h: number, s: number, l: number): string {
 export interface AccentColor {
 	accent: string;
 	accentDark: string;
+	accentTint: string;
+	accentTintBorder: string;
 }
 
 // Saturation and lightness are fixed so links stay readable on the light
@@ -49,5 +51,9 @@ export function getAccentColor(date: Date = new Date()): AccentColor {
 	return {
 		accent: hslToHex(hue, 45, 40),
 		accentDark: hslToHex(hue, 45, 30),
+		// Pale washes of the same hue for code blocks and table headers, so
+		// tinted backgrounds follow the accent instead of staying one color.
+		accentTint: hslToHex(hue, 35, 94),
+		accentTintBorder: hslToHex(hue, 30, 88),
 	};
 }

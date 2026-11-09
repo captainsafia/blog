@@ -12,6 +12,8 @@
 :root {
   --accent: #6b8e3f;
   --accent-dark: #527030;
+  --accent-tint: #f0f4ec;
+  --accent-tint-border: #e0e8d8;
 }
 
 * {
@@ -130,10 +132,10 @@ pre {
 
 code {
   padding: 0.2em 0.4em;
-  background-color: #f0f4ec;
+  background-color: var(--accent-tint);
   border-radius: 3px;
   color: var(--accent);
-  border: 1px solid #e0e8d8;
+  border: 1px solid var(--accent-tint-border);
 }
 
 pre {
@@ -142,7 +144,7 @@ pre {
   margin-bottom: 1.5rem;
   padding: 1rem;
   overflow-x: auto;
-  background-color: #f0f4ec;
+  background-color: var(--accent-tint);
   border-radius: 6px;
   line-height: 1.5;
 }
@@ -185,7 +187,7 @@ th {
 }
 
 th {
-  background-color: #f0f4ec;
+  background-color: var(--accent-tint);
   font-weight: 600;
   color: var(--accent);
 }
