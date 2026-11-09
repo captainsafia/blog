@@ -1,11 +1,20 @@
 /*
  * Clean Minimal Theme for Bug Repellent Blog
- * A spacious, minimalist design with green accents
+ * A spacious, minimalist design with a daily date-seeded accent color
  */
 
 /* ========================================
  * Base Styles
  * ======================================== */
+
+/* Fallback accent colors; overridden daily by the inline script in
+ * BaseLayout.astro, which picks a date-seeded color (see src/utils/accent.ts). */
+:root {
+  --accent: #6b8e3f;
+  --accent-dark: #527030;
+  --accent-tint: #f0f4ec;
+  --accent-tint-border: #e0e8d8;
+}
 
 * {
   -webkit-box-sizing: border-box;
@@ -32,19 +41,19 @@ body {
   background-color: #fafaf8;
   -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
-  border-top: 4px solid #6b8e3f;
+  border-top: 4px solid var(--accent);
 }
 
 /* Links */
 a {
-  color: #6b8e3f;
+  color: var(--accent);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 a:hover,
 a:focus {
-  color: #527030;
+  color: var(--accent-dark);
 }
 
 /* Headings */
@@ -82,7 +91,7 @@ p {
 
 strong {
   font-weight: 600;
-  color: #6b8e3f;
+  color: var(--accent);
 }
 
 /* Lists */
@@ -107,7 +116,7 @@ blockquote {
   padding: 0.5rem 0 0.5rem 1.5rem;
   margin: 2rem 0;
   color: #666;
-  border-left: 3px solid #6b8e3f;
+  border-left: 3px solid var(--accent);
 }
 
 blockquote p:last-child {
@@ -123,10 +132,10 @@ pre {
 
 code {
   padding: 0.2em 0.4em;
-  background-color: #f0f4ec;
+  background-color: var(--accent-tint);
   border-radius: 3px;
-  color: #6b8e3f;
-  border: 1px solid #e0e8d8;
+  color: var(--accent);
+  border: 1px solid var(--accent-tint-border);
 }
 
 pre {
@@ -135,7 +144,7 @@ pre {
   margin-bottom: 1.5rem;
   padding: 1rem;
   overflow-x: auto;
-  background-color: #f0f4ec;
+  background-color: var(--accent-tint);
   border-radius: 6px;
   line-height: 1.5;
 }
@@ -178,9 +187,9 @@ th {
 }
 
 th {
-  background-color: #f0f4ec;
+  background-color: var(--accent-tint);
   font-weight: 600;
-  color: #6b8e3f;
+  color: var(--accent);
 }
 
 /* ========================================
@@ -235,8 +244,8 @@ th {
 }
 
 .site-title a:hover {
-  color: #6b8e3f;
-  border-bottom: 2px solid #6b8e3f;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
 }
 
 .site-description {
@@ -270,15 +279,15 @@ th {
 }
 
 .nav-menu-item a:hover {
-  color: #6b8e3f;
-  border-bottom: 2px solid #6b8e3f;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
 }
 
 .nav-menu-item.active a,
 .nav-menu-item a.active {
-  color: #6b8e3f;
+  color: var(--accent);
   font-weight: 500;
-  border-bottom: 2px solid #6b8e3f;
+  border-bottom: 2px solid var(--accent);
 }
 
 .mobile-menu-toggle {
@@ -386,8 +395,8 @@ th {
 }
 
 .recent-post-title a:hover {
-  color: #6b8e3f;
-  border-bottom: 2px solid #6b8e3f;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
 }
 
 .recent-post-date {
@@ -416,8 +425,8 @@ th {
 }
 
 .view-all-link:hover {
-  color: #6b8e3f;
-  border-bottom: 1px solid #6b8e3f;
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent);
 }
 
 .page,
@@ -444,8 +453,8 @@ th {
 }
 
 .post-title a:hover {
-  color: #6b8e3f;
-  border-bottom: 2px solid #6b8e3f;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
 }
 
 .post-date {
@@ -461,7 +470,7 @@ th {
 }
 
 .post-date a:hover {
-  color: #6b8e3f;
+  color: var(--accent);
 }
 
 /* Related posts */
@@ -500,8 +509,8 @@ th {
 }
 
 .related-posts h3 a:hover {
-  color: #6b8e3f;
-  border-bottom: 1px solid #6b8e3f;
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent);
 }
 
 .related-posts small {
@@ -524,15 +533,15 @@ th {
 
 .pagination-item {
   padding: 0.5rem 1rem;
-  color: #6b8e3f;
+  color: var(--accent);
   font-weight: 500;
   transition: all 0.2s ease;
   border-bottom: 2px solid transparent;
 }
 
 a.pagination-item:hover {
-  color: #527030;
-  border-bottom: 2px solid #6b8e3f;
+  color: var(--accent-dark);
+  border-bottom: 2px solid var(--accent);
 }
 
 span.pagination-item {
@@ -571,7 +580,7 @@ span.pagination-item {
   color: #1a1a1a;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #6b8e3f;
+  border-bottom: 2px solid var(--accent);
 }
 
 .archive-month {
@@ -621,8 +630,8 @@ span.pagination-item {
 }
 
 .archive-post-link:hover {
-  color: #6b8e3f;
-  border-bottom: 1px solid #6b8e3f;
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent);
 }
 
 .archive-empty {
@@ -639,7 +648,7 @@ span.pagination-item {
 }
 
 .loading-spinner {
-  color: #6b8e3f;
+  color: var(--accent);
   font-size: 0.95rem;
   font-weight: 500;
   animation: pulse 1.5s ease-in-out infinite;
